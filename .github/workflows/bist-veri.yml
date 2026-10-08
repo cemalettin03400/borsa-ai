@@ -4,9 +4,87 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test
-        run: echo "BIST Veri Güncelle çalışıyor"
+      - name: Dosyaları indir
+        uses: actions/checkout@v4
+
+      - name: BIST verilerini çek
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+          import urllib.parse
+          from datetime import datetime, timezone
+
+          symbols = [
+              "AKBNK","ASELS","BIMAS","EREGL","FROTO",
+              "GARAN","ISCTR","KCHOL","KOZAL","PGSUS",
+              "SAHOL","SISE","TCELL","THYAO","TOASO",
+              "TUPRS","YKBNK"
+          ]
+
+          data = {
+              "_meta": {
+                  "updatedAt": datetime.now(timezone.utc).isoformat()
+              }
+          }
+
+          for symbol in symbols:
+              try:
+                  url = (
+                      "https://query1.finance.yahoo.com/v8/finance/chart/"
+                      + urllib.parse.quote(symbol + ".IS")
+                      + "?range=6mo&interval=1d"
+                  )
+
+                  req = urllib.request.Request(
+                      url,
+                      headers={"User-Agent": "Mozilla/5.0"}
+                  )
+
+                  with urllib.request.urlopen(req, timeout=20) as response:
+                      result = json.load(response)
+
+                  chart = result["chart"]["result"][0]
+                  closes = [
+                      x for x in chart["indicators"]["quote"][0]["close"]
+                      if x is not None
+                  ]
+
+                  if not closes:
+                      continue
+
+                  price = closes[-1]
+                  previous = closes[-2] if len(closes) > 1 else None
+
+                  change = None
+                  if previous:
+                      change = ((price - previous) / previous) * 100
+
+                  data[symbol] = {
+                      "price": round(price, 2),
+                      "changePercent": round(change, 2) if change is not None else None,
+                      "closes": closes
+                  }
+
+                  print(symbol, price)
+
+              except Exception as e:
+                  print("HATA:", symbol, e)
+
+          with open("data.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, ensure_ascii=False, indent=2)
+
+          print("data.json oluşturuldu.")
+          PY
+
+      - name: Veriyi kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --cached --quiet || git commit -m "BIST verilerini güncelle"
+          git push
