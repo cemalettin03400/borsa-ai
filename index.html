@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Borsa AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">📈 Borsa <span>AI</span></div>
+  <div class="badge">BIST • AI Analiz</div>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <h1>Hisseni yapay zekâ ile analiz et</h1>
+      <p>Teknik göstergeler, temel veriler, haberler ve risk skorunu tek ekranda birleştir.</p>
+    </div>
+    <div class="search">
+      <input id="symbol" placeholder="Hisse kodu (THYAO, ASELS...)" value="THYAO">
+      <button onclick="analyze()">Analiz Et</button>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card score">
+      <small>AI SKORU</small><strong id="score">78</strong><span>/100</span>
+      <div class="meter"><i id="meter"></i></div>
+      <b id="signal">OLUMLU</b>
+    </div>
+    <div class="card"><small>TREND</small><h2 id="trend">📈 Pozitif</h2><p id="trendText">Orta vadeli görünüm güçlü.</p></div>
+    <div class="card"><small>RİSK</small><h2 id="risk">Orta</h2><p>Volatilite ve piyasa koşulları dikkate alınır.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>🔎 Teknik Analiz</h2>
+    <div class="metrics">
+      <div><small>RSI</small><b id="rsi">61.4</b></div>
+      <div><small>MACD</small><b id="macd">Pozitif</b></div>
+      <div><small>MA20</small><b id="ma20">Üzerinde</b></div>
+      <div><small>MA50</small><b id="ma50">Üzerinde</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🤖 AI Yorumu</h2>
+    <p id="comment">Bu sürüm arayüz ve örnek analiz motorudur. Canlı veri bağlantısı eklendiğinde değerler otomatik güncellenecektir.</p>
+    <div class="warning">⚠️ Bu uygulama yatırım tavsiyesi değildir. Skorlar karar desteği amacıyla kullanılmalıdır.</div>
+  </section>
+</main>
+<footer>Borsa AI • İlk sürüm</footer>
+<script src="app.js"></script>
+</body>
+</html>
