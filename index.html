@@ -3,53 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Borsa AI - BIST hisseleri için teknik analiz ve AI skor ekranı">
 <title>Borsa AI</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
   <div class="brand">📈 Borsa <span>AI</span></div>
-  <div class="badge">BIST • AI Analiz</div>
+  <div class="badge">BIST • Canlı Veri • AI Analiz</div>
 </header>
+
 <main>
   <section class="hero">
     <div>
       <h1>Hisseni yapay zekâ ile analiz et</h1>
-      <p>Teknik göstergeler, temel veriler, haberler ve risk skorunu tek ekranda birleştir.</p>
+      <p>Güncel BIST verisini çek, teknik göstergeleri hesapla ve 100 üzerinden analiz skoru oluştur.</p>
+      <div id="status" class="status">● Veri bağlantısı hazırlanıyor...</div>
     </div>
     <div class="search">
-      <input id="symbol" placeholder="Hisse kodu (THYAO, ASELS...)" value="THYAO">
-      <button onclick="analyze()">Analiz Et</button>
+      <input id="symbol" placeholder="Hisse kodu (THYAO, ASELS...)" value="THYAO" autocomplete="off">
+      <button id="analyzeBtn">Analiz Et</button>
     </div>
+  </section>
+
+  <section class="card quote">
+    <div>
+      <small>SEMBOL</small>
+      <h2 id="company">THYAO</h2>
+    </div>
+    <div><small>FİYAT</small><strong id="price">—</strong><span> TL</span></div>
+    <div><small>DEĞİŞİM</small><strong id="change">—</strong></div>
+    <div><small>GÜNCELLEME</small><strong id="updated">—</strong></div>
   </section>
 
   <section class="grid">
     <div class="card score">
-      <small>AI SKORU</small><strong id="score">78</strong><span>/100</span>
+      <small>AI SKORU</small><strong id="score">—</strong><span>/100</span>
       <div class="meter"><i id="meter"></i></div>
-      <b id="signal">OLUMLU</b>
+      <b id="signal">VERİ BEKLENİYOR</b>
     </div>
-    <div class="card"><small>TREND</small><h2 id="trend">📈 Pozitif</h2><p id="trendText">Orta vadeli görünüm güçlü.</p></div>
-    <div class="card"><small>RİSK</small><h2 id="risk">Orta</h2><p>Volatilite ve piyasa koşulları dikkate alınır.</p></div>
+    <div class="card"><small>TREND</small><h2 id="trend">—</h2><p id="trendText">Veri çekildiğinde hesaplanır.</p></div>
+    <div class="card"><small>RİSK</small><h2 id="risk">—</h2><p id="riskText">Volatilite ve momentum dikkate alınır.</p></div>
   </section>
 
   <section class="card">
     <h2>🔎 Teknik Analiz</h2>
     <div class="metrics">
-      <div><small>RSI</small><b id="rsi">61.4</b></div>
-      <div><small>MACD</small><b id="macd">Pozitif</b></div>
-      <div><small>MA20</small><b id="ma20">Üzerinde</b></div>
-      <div><small>MA50</small><b id="ma50">Üzerinde</b></div>
+      <div><small>RSI (14)</small><b id="rsi">—</b></div>
+      <div><small>MACD</small><b id="macd">—</b></div>
+      <div><small>MA20</small><b id="ma20">—</b></div>
+      <div><small>MA50</small><b id="ma50">—</b></div>
     </div>
   </section>
 
   <section class="card">
     <h2>🤖 AI Yorumu</h2>
-    <p id="comment">Bu sürüm arayüz ve örnek analiz motorudur. Canlı veri bağlantısı eklendiğinde değerler otomatik güncellenecektir.</p>
-    <div class="warning">⚠️ Bu uygulama yatırım tavsiyesi değildir. Skorlar karar desteği amacıyla kullanılmalıdır.</div>
+    <p id="comment">Hisse kodunu girip Analiz Et'e basın.</p>
+    <div class="warning">⚠️ Bu uygulama yatırım tavsiyesi değildir. Veriler gecikmeli olabilir; skorlar yalnızca karar desteği amacıyla kullanılmalıdır.</div>
+  </section>
+
+  <section class="card">
+    <h2>📋 Hızlı Hisse Seçimi</h2>
+    <div id="stockList" class="stock-list">Liste yükleniyor...</div>
   </section>
 </main>
-<footer>Borsa AI • İlk sürüm</footer>
+
+<footer>Borsa AI • Teknik analiz ekranı • Veri kaynağı üçüncü taraf API</footer>
 <script src="app.js"></script>
 </body>
 </html>
