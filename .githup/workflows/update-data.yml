@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
+  push:
+    paths-ignore:
+      - "data.json"
 
 permissions:
   contents: write
@@ -15,30 +18,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: BIST verilerini al
+      - name: BIST verilerini çek
+        env:
+          SYMBOLS: "AEFES,AGHOL,AKBNK,AKSA,AKSEN,ALARK,ALBRK,ALFAS,ARCLK,ASELS,ASTOR,AYDEM,AYGAZ,BAGFS,BIMAS,BRSAN,BRYAT,CCOLA,CIMSA,CLEBI,DOAS,DOHOL,ECILC,ECZYT,EGEEN,EKGYO,ENERY,ENJSA,ENKAI,EREGL,FROTO,GARAN,GESAN,GUBRF,GWIND,HALKB,HEKTS,ISCTR,ISDMR,ISFIN,ISGYO,ISMEN,KARSN,KCAER,KCHOL,KONTR,KOZAA,KOZAL,KRDMD,LOGO,MAVI,MGROS,MIATK,ODAS,OTKAR,OYAKC,PASEU,PETKM,PGSUS,QUAGR,REEDR,SAHOL,SASA,SDTTR,SISE,SKBNK,SMRTG,SOKM,TABGD,TAVHL,TCELL,THYAO,TKFEN,TMSN,TOASO,TRCAS,TSKB,TTKOM,TTRAK,TUKAS,TUPRS,ULKER,VAKBN,VESBE,VESTL,YEOTK,YKBNK,YYLGD,ZOREN"
+
         run: |
           python - <<'PY'
           import json
+          import os
+          import time
           import urllib.request
+          import urllib.parse
           from datetime import datetime, timezone
 
-          symbols = [
-              "THYAO","ASELS","TUPRS","GARAN","AKBNK",
-              "EREGL","KCHOL","SISE","FROTO","BIMAS",
-              "TCELL","PETKM","PGSUS","TOASO","SAHOL"
-          ]
-
-          data = {
+          symbols = os.environ["SYMBOLS"].split(",")
+          db = {
               "_meta": {
                   "updatedAt": datetime.now(timezone.utc).isoformat()
               }
           }
 
-          for symbol in symbols:
+          for s in symbols:
               try:
                   url = (
                       "https://query1.finance.yahoo.com/v8/finance/chart/"
-                      + symbol + ".IS?range=6mo&interval=1d"
+                      + urllib.parse.quote(s + ".IS")
+                      + "?range=6mo&interval=1d&events=history"
                   )
 
                   req = urllib.request.Request(
@@ -50,32 +55,56 @@ jobs:
                       j = json.load(r)
 
                   result = j["chart"]["result"][0]
+                  q = result["indicators"]["quote"][0]
+
                   closes = [
-                      x for x in result["indicators"]["quote"][0]["close"]
+                      x for x in q.get("close", [])
                       if x is not None
                   ]
 
-                  if closes:
-                      price = closes[-1]
-                      previous = closes[-2] if len(closes) > 1 else price
+                  if not closes:
+                      continue
 
-                      data[symbol] = {
-                          "price": price,
-                          "changePercent":
-                              (price - previous) / previous * 100,
-                          "closes": closes
-                      }
+                  prev = closes[-2] if len(closes) > 1 else None
+                  price = closes[-1]
+
+                  pct = (
+                      ((price - prev) / prev * 100)
+                      if prev else None
+                  )
+
+                  dates = result.get("timestamp", [])
+
+                  db[s] = {
+                      "price": price,
+                      "changePercent": pct,
+                      "closes": closes,
+                      "date": (
+                          datetime.fromtimestamp(
+                              dates[-1],
+                              timezone.utc
+                          ).strftime("%Y-%m-%d")
+                          if dates else ""
+                      )
+                  }
+
+                  time.sleep(0.12)
 
               except Exception as e:
-                  print(symbol, e)
+                  print("SKIP", s, e)
 
-          with open("data.json", "w") as f:
-              json.dump(data, f)
+          with open("data.json", "w", encoding="utf-8") as f:
+              json.dump(
+                  db,
+                  f,
+                  ensure_ascii=False,
+                  separators=(",", ":")
+              )
 
-          print("Veri güncellendi.")
+          print("Hisse sayısı:", len(db) - 1)
           PY
 
-      - name: Kaydet
+      - name: Veriyi kaydet
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
