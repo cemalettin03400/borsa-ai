@@ -57,18 +57,32 @@ jobs:
                   if not closes:
                       continue
 
-                  price = closes[-1]
-                  previous = closes[-2] if len(closes) > 1 else None
 
-                  change = None
-                  if previous:
-                      change = ((price - previous) / previous) * 100
+                meta = chart.get("meta", {})
+                last_close = closes[-1]
 
-                  data[symbol] = {
-                      "price": round(price, 2),
-                      "changePercent": round(change, 2) if change is not None else None,
-                      "closes": closes
-                  }
+                # Yahoo Finance'in bildirdiği son piyasa fiyatı
+                price = meta.get("regularMarketPrice") or last_close
+
+                # Önceki kapanış fiyatı
+                previous = (
+                    meta.get("previousClose")
+                    or meta.get("chartPreviousClose")
+                    or (closes[-2] if len(closes) > 1 else None)
+                )
+
+                change = None
+                if previous:
+                    change = ((price - previous) / previous) * 100
+
+                data[symbol] = {
+                    "price": round(price, 2),
+                    "closePrice": round(last_close, 2),
+                    "previousClose": round(previous, 2) if previous else None,
+                    "changePercent": round(change, 2) if change is not None else None,
+                    "priceTime": meta.get("regularMarketTime"),
+                    "closes": closes
+                }
 
                   print(symbol, price)
 
